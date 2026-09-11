@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>링크 채팅</title>
+<link rel="stylesheet" href="style.css">
+
+<!-- 더마감과 같은 9.17.1 compat 을 씁니다 — 손에 익은 쪽으로 맞췄어요 -->
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-storage-compat.js"></script>
+</head>
+<body>
+
+<!-- ① 방 만들기 -->
+<section class="card" id="v-make" hidden>
+  <div class="head"><div class="av">💬</div>
+    <div><div class="t">새 대화 만들기</div><div class="s">링크를 만들어 보내면 끝</div></div></div>
+  <div class="pad">
+    <div class="fld"><label for="m-title">방 이름</label>
+      <input id="m-title" maxlength="40" placeholder="예) 표지 시안 얘기"></div>
+    <div class="fld"><label for="m-nick">내 닉네임</label>
+      <input id="m-nick" maxlength="20" placeholder="예) 콩"></div>
+    <div class="fld"><label for="m-pw">들어올 때 암호 (숫자 네 자리)</label>
+      <input id="m-pw" maxlength="4" inputmode="numeric" placeholder="예) 7412"></div>
+    <div class="fld"><label for="m-exp">이 방이 살아 있는 기간</label>
+      <select id="m-exp">
+        <option value="24">24시간 (기본)</option>
+        <option value="168">7일</option>
+        <option value="720">30일</option>
+        <option value="876000">안 지움</option>
+      </select></div>
+    <button class="btn" id="m-go">🔗 링크 만들기</button>
+    <div class="note" id="m-msg"></div>
+
+    <div class="linkbox" id="m-link" hidden>
+      <div class="cap">이 링크와 암호를 상대에게 보내세요</div>
+      <div class="url" id="m-url"></div>
+      <div class="row">
+        <button id="m-copy">📋 링크 복사</button>
+        <button id="m-enter">들어가기 →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ② 입장 -->
+<section class="card" id="v-join" hidden>
+  <div class="head"><div class="av">🚪</div>
+    <div><div class="t" id="j-title">초대된 대화방</div><div class="s">닉네임과 암호만 넣으면 돼요</div></div></div>
+  <div class="pad">
+    <div class="fld"><label for="j-nick">닉네임</label>
+      <input id="j-nick" maxlength="20" placeholder="이 방에서 쓸 이름"></div>
+    <div class="fld"><label for="j-pw">암호 (숫자 네 자리)</label>
+      <input id="j-pw" maxlength="4" inputmode="numeric" placeholder="초대한 사람에게 물어보세요"></div>
+    <button class="btn" id="j-go">들어가기</button>
+    <div class="note" id="j-msg"></div>
+  </div>
+</section>
+
+<!-- ③ 대화 -->
+<section class="room" id="v-room" hidden>
+  <header class="r-head">
+    <div class="av" id="r-emoji">💬</div>
+    <div class="grow"><div class="t" id="r-title">대화방</div>
+      <div class="s" id="r-who">—</div></div>
+    <div class="r-exp" id="r-exp"></div>
+    <button class="ic" id="r-invite" title="초대 링크 복사">🔗</button>
+  </header>
+
+  <div class="r-body" id="r-body"><div class="sys" id="r-loading">불러오는 중…</div></div>
+
+  <div class="r-drop" id="r-drop" hidden><div>여기에 놓으면 보내져요</div></div>
+
+  <footer class="r-in">
+    <button class="ic" id="r-clip" title="파일 보내기">📎</button>
+    <input id="r-say" placeholder="여기에 쓰거나 · Ctrl+V 로 캡처 붙여넣기" autocomplete="off">
+    <button class="ic send" id="r-send" title="보내기">↑</button>
+    <input type="file" id="r-file" multiple hidden>
+  </footer>
+  <div class="r-prog" id="r-prog" hidden><i></i><span></span></div>
+</section>
+
+<div class="boot" id="boot">연결하는 중…</div>
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

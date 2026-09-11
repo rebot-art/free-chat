@@ -1,0 +1,138 @@
+/* =====================================================================
+   링크 채팅 — 생김새
+   free-chat-bf834 · 2026-09-11
+   ---------------------------------------------------------------------
+   더마감과 **일부러 다른 옷**을 입혔습니다. 같은 사람이 만들었어도
+   하는 일이 다른 자리라, 생김새가 같으면 "여기가 어디였지" 가 됩니다.
+   ===================================================================== */
+:root{
+  --bg:#F2F4F7; --panel:#FFFFFF; --line:#E3E7EC; --line2:#EFF2F6;
+  --text:#1B1F24; --muted:#6B7480; --muted2:#98A1AC;
+  --accent:#3B6EA8; --soft:#EAF1F9; --me:#3B6EA8; --meText:#FFFFFF;
+  --warn:#B3372B; --ok:#2E7D57;
+  --r:14px; --rs:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#14171B; --panel:#1B1F25; --line:#2A3037; --line2:#22272D;
+    --text:#E8EBEF; --muted:#9AA4B0; --muted2:#6E7883;
+    --accent:#6FA3DC; --soft:#22303F; --me:#3B6EA8; --meText:#FFFFFF;
+  }
+}
+*{box-sizing:border-box}
+/* ★ [고침] hidden 이 안 먹던 문제.
+   .room{display:flex} · .r-drop{display:grid} 처럼 display 를 적어 두면
+   브라우저 기본값인 [hidden]{display:none} 을 **이깁니다** — 숨겼는데도
+   드롭 안내와 대화창이 그대로 보였어요. 한 줄로 못 박습니다. */
+[hidden]{display:none !important}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+  font-size:14px; line-height:1.6;
+  display:flex; align-items:center; justify-content:center; padding:16px;
+}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+
+/* ── 만들기 · 입장 카드 ── */
+.card{
+  width:100%; max-width:400px; background:var(--panel);
+  border:1px solid var(--line); border-radius:20px; overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.10);
+}
+.head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);}
+.head .av{width:34px;height:34px;border-radius:11px;background:var(--soft);
+  display:grid;place-items:center;font-size:17px;flex:none}
+.head .t{font-size:15px;font-weight:700}
+.head .s{font-size:11.5px;color:var(--muted);margin-top:1px}
+.pad{padding:18px 16px 20px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:6px}
+.fld input,.fld select{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--rs);
+  background:var(--panel);
+}
+.fld input:focus,.fld select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.btn{
+  width:100%;padding:12px;border:0;border-radius:var(--rs);
+  background:var(--accent);color:#fff;font-weight:700;cursor:pointer;
+}
+.btn:disabled{opacity:.5;cursor:default}
+.note{font-size:12px;color:var(--muted);margin-top:10px;min-height:18px;text-align:center}
+.note.bad{color:var(--warn)}
+.note.good{color:var(--ok)}
+
+.linkbox{margin-top:14px;padding:12px;border:1px dashed var(--accent);border-radius:12px;background:var(--soft)}
+.linkbox .cap{font-size:11px;color:var(--muted);margin-bottom:6px}
+.linkbox .url{font-size:12px;font-family:ui-monospace,Menlo,monospace;word-break:break-all;color:var(--accent)}
+.linkbox .row{display:flex;gap:7px;margin-top:10px}
+.linkbox .row button{flex:1;padding:8px;border:1px solid var(--accent);border-radius:9px;
+  background:var(--panel);color:var(--accent);font-size:12px;cursor:pointer}
+
+/* ── 대화 화면 ── */
+.room{
+  width:100%; max-width:560px; height:min(100%,780px);
+  display:flex; flex-direction:column;
+  background:var(--panel); border:1px solid var(--line); border-radius:20px; overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.10); position:relative;
+}
+.r-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);flex:none}
+.r-head .av{width:32px;height:32px;border-radius:10px;background:var(--soft);
+  display:grid;place-items:center;font-size:16px;flex:none}
+.r-head .grow{min-width:0;flex:1}
+.r-head .t{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-head .s{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-exp{font-size:11px;color:var(--muted2);flex:none;font-variant-numeric:tabular-nums}
+.ic{width:32px;height:32px;border:0;border-radius:10px;background:var(--soft);
+  display:grid;place-items:center;font-size:15px;cursor:pointer;flex:none}
+.ic.send{background:var(--accent);color:#fff;border-radius:999px;font-size:16px}
+
+.r-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 12px;background:var(--bg)}
+.sys{text-align:center;font-size:11.5px;color:var(--muted);margin:8px 0 14px}
+.msg{display:flex;gap:8px;margin-bottom:12px;align-items:flex-end}
+.msg.me{flex-direction:row-reverse}
+.msg .ava{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;
+  font-size:12px;font-weight:700;color:#fff;flex:none}
+.msg .col{max-width:78%;min-width:0}
+.msg .who{font-size:11px;color:var(--muted);margin-bottom:3px}
+.msg.me .who{text-align:right}
+.bub{padding:9px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);
+  word-break:break-word;white-space:pre-wrap}
+.msg.me .bub{background:var(--me);color:var(--meText);border-color:var(--me)}
+.bub a{color:inherit}
+.bub.plain{padding:0;background:none;border:0}
+.meta{font-size:10.5px;color:var(--muted2);margin-top:3px;display:flex;gap:6px}
+.msg.me .meta{justify-content:flex-end}
+.meta .read{color:var(--accent);font-weight:700}
+
+.file{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:13px;
+  background:var(--panel);border:1px solid var(--line);text-decoration:none;color:inherit;min-width:200px}
+.file .ex{width:34px;height:40px;border-radius:6px;background:var(--soft);display:grid;place-items:center;
+  font-size:10.5px;font-weight:800;color:var(--accent);flex:none;border:1px solid var(--line)}
+.file .nm{font-size:12.5px;font-weight:600;word-break:break-all;line-height:1.4}
+.file .sz{font-size:11px;color:var(--muted);margin-top:2px}
+.file .dl{margin-left:auto;font-size:17px;color:var(--accent);flex:none}
+
+.shot{border-radius:13px;border:1px solid var(--line);overflow:hidden;background:var(--panel);max-width:260px;display:block}
+.shot img{display:block;width:100%;height:auto}
+.shot .cap{font-size:10.5px;color:var(--muted);padding:5px 9px}
+
+.r-in{display:flex;align-items:center;gap:8px;padding:10px;border-top:1px solid var(--line);flex:none}
+.r-in input{flex:1;min-width:0;padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.r-in input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+
+.r-drop{position:absolute;inset:0;background:rgba(59,110,168,.14);border:3px dashed var(--accent);
+  border-radius:20px;display:grid;place-items:center;font-weight:700;color:var(--accent);z-index:5}
+.r-prog{position:absolute;left:0;right:0;bottom:52px;padding:6px 14px;background:var(--panel);
+  border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.r-prog i{flex:1;height:4px;border-radius:2px;background:var(--line);position:relative;overflow:hidden}
+.r-prog i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p,0%);background:var(--accent)}
+
+.boot{font-size:13px;color:var(--muted)}
+
+/* 좁은 화면 — 폰에서는 화면을 꽉 채웁니다 */
+@media (max-width:620px){
+  body{padding:0;align-items:stretch}
+  .room{max-width:none;height:100%;border:0;border-radius:0;box-shadow:none}
+  .card{margin:auto}
+}
