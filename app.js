@@ -35,6 +35,23 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
   const kb = (n) => n < 1024 ? n + " B" : n < 1048576 ? (n/1024).toFixed(0) + " KB" : (n/1048576).toFixed(1) + " MB";
 
+  /* =====================================================================
+     🎲 얼굴 이모지 (2026-09-11 — 콩)
+     ---------------------------------------------------------------------
+     처음에는 **닉네임 첫 글자**를 프사 자리에 넣었는데, 바로 옆 닉네임과
+     같은 글자가 두 번 보여서 겹쳐 읽혔습니다. 이제 들어올 때 이모지를
+     하나 무작위로 뽑아 줍니다. 마음에 안 들면 🎲 로 다시 뽑을 수 있어요.
+     ★ 방에 이미 있는 이모지는 빼고 뽑습니다 — 둘이 같은 얼굴이면
+       갈라 보는 뜻이 없어집니다. (다 떨어지면 그때는 겹쳐도 놔둡니다) */
+  const EMOJI = ("🐰🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🦆🦉🦄🐝🦋🐢🐙🐳🐬🐠🐡🦀🐌" +
+                 "🌸🌼🌻🌷🌱🍀🌵🍄🍎🍊🍋🍉🍓🍇🍑🍒🥝🥑🌽🥕🍞🧀🍕🍜🍰🍩🍪🍫🍿" +
+                 "☕🍵🧋⭐🌙☁️⚡🔥💎🎈🎨🎵🎸📚✏️🧸🪄🔮").match(/./gu);
+  const pickEmoji = (used) => {
+    const rest = EMOJI.filter(e => !(used || []).includes(e));
+    const pool = rest.length ? rest : EMOJI;
+    return pool[Math.floor(Math.random() * pool.length)];
+  };
+
   /* 닉네임마다 늘 같은 색 — 여러 명이 떠들어도 누가 누군지 갈립니다 */
   const COLORS = ["#3B6EA8","#2E7D57","#B3372B","#7A5BB5","#C2762B","#1F8A8A","#B2477F","#5A6B7C"];
   const colorOf = (s) => {
@@ -51,10 +68,19 @@
     return [...a].map(x => A[x % A.length]).join("");
   }
 
+  /* 🎲 단추 — 두 화면이 같은 방식이라 한 함수로 묶습니다 */
+  function wireEmoji(viewId, btnId, used) {
+    const box = $(viewId);
+    const roll = () => { box.textContent = pickEmoji(used || []); };
+    roll();
+    $(btnId).addEventListener("click", roll);
+    return () => box.textContent;
+  }
+
   const q = new URLSearchParams(location.search);
   const RID = (q.get("r") || "").replace(/[^a-z0-9]/g, "").slice(0, 40);
 
-  let db, st, me = null, myNick = "", myColor = "", roomRef = null;
+  let db, st, me = null, myNick = "", myColor = "", myEmoji = "", roomRef = null;
   let meta = null, members = {}, lastMsgAt = 0, lastReadSent = 0, readTimer = null;
   let expTimer = null;
 
@@ -82,7 +108,7 @@
   firebase.auth().onAuthStateChanged(u => {
     if (!u) return;
     me = u.uid;
-    if (RID) openJoin(); else show("v-make");
+    if (RID) openJoin(); else { wireEmoji("m-emo", "m-emo-go"); show("v-make"); }
   });
 
   /* =====================================================================
@@ -110,8 +136,9 @@
         meta: { title, createdAt: now, expireAt: now + hours * 3600000, owner: me },
         gate: pw
       });
+      myEmoji = $("m-emo").textContent;
       await db.ref("rooms/" + rid + "/members/" + me).set({
-        nick, color: colorOf(nick), joinedAt: now, lastRead: now, g: pw
+        nick, color: colorOf(nick), emoji: myEmoji, joinedAt: now, lastRead: now, g: pw
       });
 
       const url = location.origin + location.pathname + "?r=" + rid;
@@ -144,10 +171,24 @@
       if (!s.exists()) { $("j-title").textContent = "없는 방이에요"; say("j-msg", "링크가 잘못됐거나 방이 지워졌어요.", "bad"); return; }
       meta = s.val();
       $("j-title").textContent = meta.title || "대화방";
+      /* 방에 이미 있는 얼굴은 빼고 뽑습니다.
+         ★ 아직 멤버가 아니라 members 를 못 읽어요(규칙이 막습니다).
+           그래서 못 읽으면 그냥 전부에서 뽑습니다 — 어차피 흔치 않은 일이고,
+           겹쳐도 이름으로 갈립니다. */
+      let used = [];
+      try {
+        const ms = await db.ref("rooms/" + RID + "/members").get();
+        used = Object.values(ms.val() || {}).map(m => m.emoji).filter(Boolean);
+      } catch (e) {}
+      wireEmoji("j-emo", "j-emo-go", used);
       if (Date.now() >= meta.expireAt) say("j-msg", "이 방은 기간이 지났어요.", "bad");
       /* 이미 들어와 있던 사람이면 바로 통과 */
       const mine = await db.ref("rooms/" + RID + "/members/" + me).get();
-      if (mine.exists()) { myNick = mine.val().nick; myColor = mine.val().color || colorOf(myNick); enterRoom(); }
+      if (mine.exists()) {
+        const v = mine.val();
+        myNick = v.nick; myColor = v.color || colorOf(myNick); myEmoji = v.emoji || "🙂";
+        enterRoom();
+      }
     } catch (e) {
       say("j-msg", "방을 여는 데 실패했어요 (" + (e.code || e.message) + ")", "bad");
     }
@@ -162,9 +203,9 @@
     $("j-go").disabled = true;
     say("j-msg", "들어가는 중…");
     try {
-      myNick = nick; myColor = colorOf(nick);
+      myNick = nick; myColor = colorOf(nick); myEmoji = $("j-emo").textContent;
       await db.ref("rooms/" + RID + "/members/" + me).set({
-        nick, color: myColor, joinedAt: Date.now(), lastRead: Date.now(), g: pw
+        nick, color: myColor, emoji: myEmoji, joinedAt: Date.now(), lastRead: Date.now(), g: pw
       });
       enterRoom();
     } catch (e) {
@@ -181,11 +222,12 @@
     show("v-room");
     roomRef = db.ref("rooms/" + RID);
     $("r-title").textContent = (meta && meta.title) || "대화방";
+    $("r-emoji").textContent = myEmoji || "💬";
 
     /* 참여자 — 이름줄과 읽음 세기에 씁니다 */
     roomRef.child("members").on("value", s => {
       members = s.val() || {};
-      const names = Object.values(members).map(m => m.nick);
+      const names = Object.values(members).map(m => (m.emoji || "") + " " + m.nick);
       $("r-who").textContent = names.join(" · ") + " — " + names.length + "명";
       paintRead();
     });
@@ -240,7 +282,8 @@
     w.dataset.mine = mine ? "1" : "";
 
     const c = m.c || colorOf(m.n || "");
-    const initial = (m.n || "?").trim().slice(0, 1);
+    /* 이모지가 없던 옛 메시지도 있으니 members 에서 한 번 더 찾아봅니다 */
+    const face = m.e || (members[m.u] && members[m.u].emoji) || "🙂";
     const t = new Date(m.at || Date.now());
     const hh = t.getHours(), time = (hh < 12 ? "오전 " : "오후 ") + ((hh % 12) || 12) + ":" + String(t.getMinutes()).padStart(2, "0");
 
@@ -261,8 +304,8 @@
     }
 
     w.innerHTML =
-      `<div class="ava" style="background:${esc(c)}">${esc(initial)}</div>
-       <div class="col"><div class="who">${esc(m.n || "")}</div>${inner}
+      `<div class="ava">${esc(face)}</div>
+       <div class="col"><div class="who" style="color:${esc(c)}">${esc(m.n || "")}</div>${inner}
          <div class="meta"><span>${time}</span><span class="read"></span></div></div>`;
     body.appendChild(w);
     if (m.at > lastMsgAt) lastMsgAt = m.at;
@@ -299,7 +342,7 @@
 
   /* ── 보내기 ─────────────────────────────────────────────── */
   function push(extra) {
-    const m = Object.assign({ u: me, n: myNick, c: myColor, at: Date.now() }, extra);
+    const m = Object.assign({ u: me, n: myNick, c: myColor, e: myEmoji, at: Date.now() }, extra);
     return roomRef.child("msgs").push(m);
   }
   function sendText() {

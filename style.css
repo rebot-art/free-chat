@@ -62,6 +62,15 @@ button,input,select{font-family:inherit;font-size:inherit;color:inherit}
 .note.bad{color:var(--warn)}
 .note.good{color:var(--ok)}
 
+/* 🎲 내 이모지 고르는 줄 */
+.emorow{display:flex;align-items:center;gap:10px;margin-bottom:12px;
+  padding:9px 11px;border:1px solid var(--line);border-radius:var(--rs);background:var(--bg)}
+.emorow .big{width:40px;height:40px;border-radius:12px;background:var(--panel);
+  border:1px solid var(--line);display:grid;place-items:center;font-size:21px;line-height:1;flex:none}
+.emorow .tx{flex:1;min-width:0;font-size:11.5px;color:var(--muted);line-height:1.5}
+.emorow button{padding:7px 11px;border:1px solid var(--accent);border-radius:9px;
+  background:var(--panel);color:var(--accent);font-size:12px;cursor:pointer;flex:none}
+
 .linkbox{margin-top:14px;padding:12px;border:1px dashed var(--accent);border-radius:12px;background:var(--soft)}
 .linkbox .cap{font-size:11px;color:var(--muted);margin-bottom:6px}
 .linkbox .url{font-size:12px;font-family:ui-monospace,Menlo,monospace;word-break:break-all;color:var(--accent)}
@@ -89,13 +98,22 @@ button,input,select{font-family:inherit;font-size:inherit;color:inherit}
 
 .r-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 12px;background:var(--bg)}
 .sys{text-align:center;font-size:11.5px;color:var(--muted);margin:8px 0 14px}
-.msg{display:flex;gap:8px;margin-bottom:12px;align-items:flex-end}
+/* ★ [고침 2026-09-11 — 콩] 카톡과 견줘 보니 줄이 어긋나 있었습니다.
+   프사가 **아래**에 붙고 닉네임이 말풍선 위에 따로 떠서, 셋이 한 덩어리로
+   안 읽혔어요. 이제 카톡처럼 **프사 옆에 닉네임, 그 아래 말풍선** 입니다.
+     [프사] 닉네임
+            [말풍선]  시각
+   ★ 내 말에는 프사도 닉네임도 안 붙입니다 — 색으로 이미 갈리고,
+     카톡도 그렇게 합니다. 화면도 그만큼 넓어져요. */
+.msg{display:flex;gap:8px;margin-bottom:14px;align-items:flex-start}
 .msg.me{flex-direction:row-reverse}
-.msg .ava{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;
-  font-size:12px;font-weight:700;color:#fff;flex:none}
+.msg .ava{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  font-size:18px;line-height:1;background:var(--soft);border:1px solid var(--line);flex:none;
+  margin-top:1px}
+.msg.me .ava,.msg.me .who{display:none}
 .msg .col{max-width:78%;min-width:0}
-.msg .who{font-size:11px;color:var(--muted);margin-bottom:3px}
-.msg.me .who{text-align:right}
+/* 닉네임에 사람 색을 입힙니다 — 프사가 이모지가 되면서 색을 잃었거든요 */
+.msg .who{font-size:11.5px;font-weight:600;margin-bottom:4px}
 .bub{padding:9px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);
   word-break:break-word;white-space:pre-wrap}
 .msg.me .bub{background:var(--me);color:var(--meText);border-color:var(--me)}
